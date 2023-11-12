@@ -44,26 +44,41 @@ def draw_map(screen, map):
 
 def draw_player(screen, position):
     pygame.draw.circle(screen, GREEN, position, 10)
+
+def get_cell(position):
+    return (int(position[1]/CELL_SIZE), int(position[0]/CELL_SIZE))
+
+def has_collided(map, position):
+    (i, j) = get_cell(position)
+
+    return True if map[i][j] != 0 else False
+
+def update_position(old_position):
+    keys = pygame.key.get_pressed()
+
+    position = list(old_position)
+
+    if keys[pygame.K_RIGHT]:
+        position[0] += SPEED * DT
+    if keys[pygame.K_LEFT]:
+        position[0] -= SPEED * DT
+    if keys[pygame.K_DOWN]:
+        position[1] += SPEED * DT
+    if keys[pygame.K_UP]:
+        position[1] -= SPEED * DT
+
+    if has_collided(map, position):
+        return old_position
+    else:
+        return tuple(position)
   
 while not exit: 
-    keys = pygame.key.get_pressed()
 
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             exit = True
 
-    position_arr = list(position)
-
-    if keys[pygame.K_RIGHT]:
-        position_arr[0] += SPEED * DT
-    if keys[pygame.K_LEFT]:
-        position_arr[0] -= SPEED * DT
-    if keys[pygame.K_DOWN]:
-        position_arr[1] += SPEED * DT
-    if keys[pygame.K_UP]:
-        position_arr[1] -= SPEED * DT
-
-    position = tuple(position_arr)
+    position = update_position(position)
 
     screen.fill(BLACK)
     draw_map(screen, map)
