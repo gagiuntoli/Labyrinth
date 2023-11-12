@@ -14,9 +14,11 @@ map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
-FPS  = 24
-COLS = len(map[0])
-ROWS = len(map)
+FPS   = 24
+DT    = 1.0
+SPEED = 10.0
+COLS  = len(map[0])
+ROWS  = len(map)
 
 BLACK  = (0x00, 0x00, 0x00)
 ORANGE = (0xFF, 0x8C, 0x00)
@@ -44,12 +46,27 @@ def draw_player(screen, position):
     pygame.draw.circle(screen, GREEN, position, 10)
   
 while not exit: 
+    keys = pygame.key.get_pressed()
+
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             exit = True
 
-    draw_map(screen, map)
+    position_arr = list(position)
 
+    if keys[pygame.K_RIGHT]:
+        position_arr[0] += SPEED * DT
+    if keys[pygame.K_LEFT]:
+        position_arr[0] -= SPEED * DT
+    if keys[pygame.K_DOWN]:
+        position_arr[1] += SPEED * DT
+    if keys[pygame.K_UP]:
+        position_arr[1] -= SPEED * DT
+
+    position = tuple(position_arr)
+
+    screen.fill(BLACK)
+    draw_map(screen, map)
     draw_player(screen, position)
 
     pygame.display.flip()
