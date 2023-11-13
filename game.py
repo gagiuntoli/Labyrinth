@@ -1,7 +1,9 @@
 import pygame
 from math import pi, cos, sin
 
-CELL_SIZE = 100
+from constants import CELL_SIZE
+from raycasting import add_vector, compute_rays
+from map import get_cell
 
 map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -46,23 +48,19 @@ def draw_map(screen, map):
             if val != 0:
                 pygame.draw.rect(screen, RED, pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-def draw_player(screen, position, vision_angle):
+def draw_player(screen, position, rays):
     pygame.draw.circle(screen, GREEN, position, 10)
-    vector = polar_to_cartesian(50, vision_angle)
-    position_end = add_vector(position, vector)
-    pygame.draw.line(screen, BLUE, position, position_end, 1)
+    for ray in rays:
+        (angle, depth) = ray
+        vector = polar_to_cartesian(depth, angle)
+        position_end = add_vector(position, vector)
+        pygame.draw.line(screen, BLUE, position, position_end, 1)
 
 def polar_to_cartesian(module, angle):
     return (module * cos(angle), module * sin(angle))
 
-def add_vector(v1, v2):
-    return (v1[0]+v2[0], v1[1]+v2[1])
-
-def get_cell(position):
-    return (int(position[1]/CELL_SIZE), int(position[0]/CELL_SIZE))
-
 def has_collided(map, position):
-    (i, j) = get_cell(position)
+    (i, j) = get_cell(position, CELL_SIZE)
     return True if map[i][j] != 0 else False
 
 def update_position(old_position):
@@ -102,10 +100,11 @@ while not exit:
 
     position = update_position(position)
     vision_angle = update_vision_angle(vision_angle)
+    rays = compute_rays(map, position, vision_angle, 1)
 
     screen.fill(BLACK)
     draw_map(screen, map)
-    draw_player(screen, position, vision_angle)
+    draw_player(screen, position, rays)
 
     pygame.display.flip()
     clock.tick(FPS)
