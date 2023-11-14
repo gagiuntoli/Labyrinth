@@ -1,8 +1,8 @@
 import pygame
 from math import pi, cos, sin, tan
 
-from constants import CELL_SIZE
-from raycasting import NUM_RAYS, add_vector, compute_rays
+from constants import CELL_SIZE, NUM_RAYS
+from raycasting import add_vector, compute_rays, normalize
 from map import get_cell
 
 map = [
@@ -91,24 +91,32 @@ def has_collided(map, position):
     (i, j) = get_cell(position, CELL_SIZE)
     return True if map[i][j] != 0 else False
 
-def update_position(old_position):
+def update_position(position, vision_angle):
     keys = pygame.key.get_pressed()
 
-    position = list(old_position)
+    (x, y) = list(position)
+    sin_a = sin(vision_angle)
+    cos_a = cos(vision_angle)
 
     if keys[pygame.K_RIGHT]:
-        position[0] += SPEED * DT
+        normal = normalize((-sin_a, cos_a), SPEED * DT)
+        x += normal[0]
+        y += normal[1]
     if keys[pygame.K_LEFT]:
-        position[0] -= SPEED * DT
+        normal = normalize((sin_a, -cos_a), SPEED * DT)
+        x += normal[0]
+        y += normal[1]
     if keys[pygame.K_DOWN]:
-        position[1] += SPEED * DT
+        x -= SPEED * DT * cos_a
+        y -= SPEED * DT * sin_a
     if keys[pygame.K_UP]:
-        position[1] -= SPEED * DT
+        x += SPEED * DT * cos_a
+        y += SPEED * DT * sin_a
 
-    if has_collided(map, position):
-        return old_position
+    if has_collided(map, (x,y)):
+        return position
     else:
-        return tuple(position)
+        return (x, y)
 
 def update_vision_angle(vision_angle):
     keys = pygame.key.get_pressed()
@@ -126,13 +134,13 @@ while not exit:
         if event.type == pygame.QUIT: 
             exit = True
 
-    position = update_position(position)
+    position = update_position(position, vision_angle)
     vision_angle = update_vision_angle(vision_angle)
-    rays = compute_rays(map, position, vision_angle, 1020, VISION_ANGLE)
+    rays = compute_rays(map, position, vision_angle, NUM_RAYS, VISION_ANGLE)
 
     screen.fill(BLACK)
-    draw_map(screen, map, position, rays, scale=0.25)
     draw_3d_view(screen, rays, vision_angle)
+    draw_map(screen, map, position, rays, scale=0.25)
 
     pygame.display.flip()
     clock.tick(FPS)

@@ -2,9 +2,8 @@
 from math import pi, sin, cos, sqrt
 
 from map import get_cell
-from constants import CELL_SIZE
+from constants import CELL_SIZE, NUM_RAYS
 
-NUM_RAYS = 20
 RAY_ANGLE = pi / 4
 MAX_ITERS = 2000
 TOL = 1e-3

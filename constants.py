@@ -1,2 +1,3 @@
 
 CELL_SIZE = 100
+NUM_RAYS = 700
