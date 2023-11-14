@@ -52,7 +52,7 @@ def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=RAY_A
         dx = CELL_SIZE if cos_a > 0 else -CELL_SIZE
 
         xi = x_map + CELL_SIZE + TOL if cos_a > 0 else x_map - TOL
-        yi = y + abs(x - xi) * abs(tan_a) if sin_a > 0 else y - abs(x - xi) * abs(tan_a)
+        yi = y + (xi - x) * tan_a 
         ver_depth = get_norm((xi-x, yi-y))
 
         iters = 0
@@ -74,7 +74,7 @@ def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=RAY_A
         dy = CELL_SIZE if sin_a > 0 else -CELL_SIZE
 
         yi = y_map + CELL_SIZE + TOL if sin_a > 0 else y_map - TOL
-        xi = x + abs(y - yi) / abs(tan_a) if cos_a > 0 else x - abs(y - yi) / abs(tan_a)
+        xi = x + (yi - y) / tan_a 
         hor_depth = get_norm((xi-x, yi-y))
 
         iters = 0
