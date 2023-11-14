@@ -47,6 +47,10 @@ def draw_map(screen, map):
         for j, val in enumerate(row):
             if val != 0:
                 pygame.draw.rect(screen, RED, pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            else:
+                pygame.draw.rect(screen, WHITE, pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE), width=1)
+                pygame.draw.rect(screen, BLACK, pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE-1e-3, CELL_SIZE-1e-3), width=0)
+
 
 def draw_player(screen, position, rays):
     pygame.draw.circle(screen, GREEN, position, 10)
@@ -100,7 +104,7 @@ while not exit:
 
     position = update_position(position)
     vision_angle = update_vision_angle(vision_angle)
-    rays = compute_rays(map, position, vision_angle, 1)
+    rays = compute_rays(map, position, vision_angle, 60, pi/6)
 
     screen.fill(BLACK)
     draw_map(screen, map)
