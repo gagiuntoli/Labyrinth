@@ -25,6 +25,18 @@ def add_vectors(v1, v2):
 def is_inside_map(map, i, j):
     return i >= 0 and i < len(map) and j >= 0 and j < len(map[0])
 
+def compute_depth(map, xi, yi, dx, dy, delta_depth, max_iters=MAX_ITERS):
+    depth = 0
+    for _ in range(max_iters):
+        (i, j) = get_cell((xi, yi), CELL_SIZE)
+        if is_inside_map(map, i, j):
+            if map[i][j] != 0:
+                return depth
+        else:
+            return depth
+        xi += dx
+        yi += dy
+        depth += delta_depth
 
 # Returns the deep of every ray
 def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=RAY_ANGLE):
@@ -46,48 +58,20 @@ def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=RAY_A
         tan_a = sin_a / cos_a
 
         # verticals 
-        ddepth = abs(CELL_SIZE / cos_a)
-        dy = ddepth * sin_a
+        delta_depth = abs(CELL_SIZE / cos_a)
+        dy = delta_depth * sin_a
         dx = CELL_SIZE if cos_a > 0 else -CELL_SIZE
-
         xi = x_map + CELL_SIZE + TOL if cos_a > 0 else x_map - TOL
         yi = y + (xi - x) * tan_a 
-        ver_depth = get_norm((xi-x, yi-y))
-
-        iters = 0
-        while iters < MAX_ITERS:
-            (i, j) = get_cell((xi, yi), CELL_SIZE)
-            if is_inside_map(map, i, j):
-                if map[i][j] != 0:
-                    break
-            else: 
-                break
-            xi += dx
-            yi += dy
-            ver_depth += ddepth
-            iters += 1
+        ver_depth = get_norm((xi-x, yi-y)) + compute_depth(map, xi, yi, dx, dy, delta_depth)
 
         # horizontals
-        ddepth = abs(CELL_SIZE / sin_a)
-        dx = ddepth * cos_a
+        delta_depth = abs(CELL_SIZE / sin_a)
+        dx = delta_depth * cos_a
         dy = CELL_SIZE if sin_a > 0 else -CELL_SIZE
-
         yi = y_map + CELL_SIZE + TOL if sin_a > 0 else y_map - TOL
         xi = x + (yi - y) / tan_a 
-        hor_depth = get_norm((xi-x, yi-y))
-
-        iters = 0
-        while iters < MAX_ITERS:
-            (i, j) = get_cell((xi, yi), CELL_SIZE)
-            if is_inside_map(map, i, j):
-                if map[i][j] != 0:
-                    break
-            else: 
-                break
-            xi += dx
-            yi += dy
-            hor_depth += ddepth
-            iters += 1
+        hor_depth = get_norm((xi-x, yi-y)) + compute_depth(map, xi, yi, dx, dy, delta_depth)
 
         rays.append((angle, min(hor_depth, ver_depth)))
 
