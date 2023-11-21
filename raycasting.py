@@ -8,9 +8,6 @@ RAY_ANGLE = pi / 4
 MAX_ITERS = 2000
 TOL = 1e-3
 
-def add_vector(v1, v2):
-    return (v1[0]+v2[0], v1[1]+v2[1])
-
 def get_norm(vector):
     return sqrt(vector[0]**2 + vector[1]**2)
 
@@ -18,9 +15,6 @@ def normalize(vector, new_norm):
     norm = get_norm(vector)
     factor = new_norm/norm
     return (vector[0]*factor, vector[1]*factor)
-
-def add_vectors(v1, v2):
-    return (v1[0]+v2[0], v1[1]+v2[1])
 
 def is_inside_map(map, i, j):
     return i >= 0 and i < len(map) and j >= 0 and j < len(map[0])

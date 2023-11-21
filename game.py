@@ -2,7 +2,7 @@ import pygame
 from math import pi, cos, sin, tan
 
 from constants import CELL_SIZE, NUM_RAYS
-from raycasting import add_vector, compute_rays, normalize
+from raycasting import compute_rays, normalize
 from map import get_cell
 
 map = [
@@ -13,17 +13,23 @@ map = [
     [1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
 FPS   = 24
 DT    = 1.0
 SPEED = 10.0
-SPEED_ROT = 0.2
+SPEED_ROT = 0.1
 COLS  = len(map[0])
 ROWS  = len(map)
 VISION_ANGLE = pi / 4
 WALL_HEIGHT = 20.0
+PLAYER_SIZE = 1.2
 
 SCREEN_WIDTH = COLS * CELL_SIZE
 SCREEN_HEIGHT = ROWS * CELL_SIZE
@@ -70,12 +76,15 @@ def draw_player(screen, position, rays, scale=1.0, xoffset=0.0, yoffset=0.0):
     pygame.draw.circle(screen, GREEN, (x, y), int(2*10*scale))
     for ray in rays:
         (angle, depth) = ray
-        vector = polar_to_cartesian(depth*scale, angle)
-        position_end = add_vector((x, y), vector)
+        (vx, vy) = polar_to_cartesian(depth*scale, angle)
+        position_end = (x+vx, y+vy)
         pygame.draw.line(screen, BLUE, (x,y), position_end, 1)
 
 def draw_3d_view(screen, rays, vision_angle):
     for (angle, depth) in rays:
+        # remove fishbowl effect
+        depth *= cos(angle - vision_angle)
+
         x = DIST_TO_SCREEN * tan(angle - vision_angle) + HALF_SCREEN_WIDTH
         height = WALL_HEIGHT / (depth + 1e-4) * DIST_TO_SCREEN
         y = SCREEN_HEIGHT / 2 - height / 2
@@ -98,25 +107,27 @@ def update_position(position, vision_angle):
     sin_a = sin(vision_angle)
     cos_a = cos(vision_angle)
 
+    (dx, dy) = (0,0)
+
     if keys[pygame.K_RIGHT]:
         normal = normalize((-sin_a, cos_a), SPEED * DT)
-        x += normal[0]
-        y += normal[1]
+        dx = normal[0]
+        dy = normal[1]
     if keys[pygame.K_LEFT]:
         normal = normalize((sin_a, -cos_a), SPEED * DT)
-        x += normal[0]
-        y += normal[1]
+        dx = normal[0]
+        dy = normal[1]
     if keys[pygame.K_DOWN]:
-        x -= SPEED * DT * cos_a
-        y -= SPEED * DT * sin_a
+        dx = -SPEED * DT * cos_a
+        dy = -SPEED * DT * sin_a
     if keys[pygame.K_UP]:
-        x += SPEED * DT * cos_a
-        y += SPEED * DT * sin_a
+        dx = SPEED * DT * cos_a
+        dy = SPEED * DT * sin_a
 
-    if has_collided(map, (x,y)):
-        return position
-    else:
+    if has_collided(map, (x+dx*PLAYER_SIZE,y+dy*PLAYER_SIZE)):
         return (x, y)
+    else:
+        return (x+dx, y+dy)
 
 def update_vision_angle(vision_angle):
     keys = pygame.key.get_pressed()
