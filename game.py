@@ -1,51 +1,18 @@
 import pygame
 from math import pi, cos, sin, tan
 
-from constants import CELL_SIZE, NUM_RAYS
-from raycasting import compute_rays, normalize
+from constants import CELL_SIZE, NUM_RAYS, \
+    SCREEN_HEIGHT, SCREEN_WIDTH, DIST_TO_SCREEN, WALL_HEIGHT, \
+    BLUE, GREEN, WHITE, BLACK, RED, \
+    DT, SPEED, SPEED_ROT, \
+    PLAYER_SIZE, VISION_ANGLE, FPS, map
+
+from raycasting import compute_rays
 from map import get_cell
-
-map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
-    [1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-]
-
-FPS   = 24
-DT    = 1.0
-SPEED = 10.0
-SPEED_ROT = 0.1
-COLS  = len(map[0])
-ROWS  = len(map)
-VISION_ANGLE = pi / 4
-WALL_HEIGHT = 20.0
-PLAYER_SIZE = 1.2
-
-SCREEN_WIDTH = COLS * CELL_SIZE
-SCREEN_HEIGHT = ROWS * CELL_SIZE
-HALF_SCREEN_WIDTH = SCREEN_WIDTH / 2
-HALF_SCREEN_HEIGHT = SCREEN_HEIGHT / 2
-DIST_TO_SCREEN = HALF_SCREEN_WIDTH / tan(VISION_ANGLE / 2)
-
-BLACK  = (0x00, 0x00, 0x00)
-ORANGE = (0xFF, 0x8C, 0x00)
-WHITE  = (0xFF, 0xFF, 0xFF)
-RED    = (0xFF, 0x00, 0x00)
-GREEN  = (0xAA, 0xFF, 0x00)
-BLUE   = (0x00, 0xFF, 0xFF)
+from vector import normalize, polar_to_cartesian
 
 position = (110.0, 110.0)
-vision_angle   = 0.0
+vision_angle = 0.0
 
 pygame.init()
 
@@ -82,19 +49,17 @@ def draw_player(screen, position, rays, scale=1.0, xoffset=0.0, yoffset=0.0):
 
 def draw_3d_view(screen, rays, vision_angle):
     for (angle, depth) in rays:
+
         # remove fishbowl effect
         depth *= cos(angle - vision_angle)
 
-        x = DIST_TO_SCREEN * tan(angle - vision_angle) + HALF_SCREEN_WIDTH
+        x = DIST_TO_SCREEN * tan(angle - vision_angle) + SCREEN_WIDTH / 2
         height = WALL_HEIGHT / (depth + 1e-4) * DIST_TO_SCREEN
         y = SCREEN_HEIGHT / 2 - height / 2
         width = SCREEN_WIDTH / NUM_RAYS
         color = [255 / (1 + depth * 1e-2)]*3
         pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
-        
 
-def polar_to_cartesian(module, angle):
-    return (module * cos(angle), module * sin(angle))
 
 def has_collided(map, position):
     (i, j) = get_cell(position, CELL_SIZE)
@@ -132,9 +97,9 @@ def update_position(position, vision_angle):
 def update_vision_angle(vision_angle):
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_z]:
-        vision_angle += SPEED_ROT * DT
     if keys[pygame.K_x]:
+        vision_angle += SPEED_ROT * DT
+    if keys[pygame.K_z]:
         vision_angle -= SPEED_ROT * DT
 
     return vision_angle % (2 * pi)

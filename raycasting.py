@@ -1,23 +1,12 @@
+from math import pi, sin, cos
 
-from math import pi, sin, cos, sqrt
-
-from map import get_cell
-from constants import CELL_SIZE, NUM_RAYS
+from map import get_cell, is_inside_map
+from constants import CELL_SIZE, NUM_RAYS, VISION_ANGLE
+from vector import get_norm
 
 RAY_ANGLE = pi / 4
 MAX_ITERS = 2000
 TOL = 1e-3
-
-def get_norm(vector):
-    return sqrt(vector[0]**2 + vector[1]**2)
-
-def normalize(vector, new_norm):
-    norm = get_norm(vector)
-    factor = new_norm/norm
-    return (vector[0]*factor, vector[1]*factor)
-
-def is_inside_map(map, i, j):
-    return i >= 0 and i < len(map) and j >= 0 and j < len(map[0])
 
 def compute_depth(map, xi, yi, dx, dy, delta_depth, max_iters=MAX_ITERS):
     depth = 0
@@ -33,7 +22,7 @@ def compute_depth(map, xi, yi, dx, dy, delta_depth, max_iters=MAX_ITERS):
         depth += delta_depth
 
 # Returns the deep of every ray
-def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=RAY_ANGLE):
+def compute_rays(map, position, vision_angle, num_rays=NUM_RAYS, ray_angle=VISION_ANGLE):
     rays = []
     delta_angle = 0 if num_rays == 1 else ray_angle / (num_rays - 1)
 
